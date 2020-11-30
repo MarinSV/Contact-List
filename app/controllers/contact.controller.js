@@ -1,144 +1,182 @@
 const db = require("../models");
 
 const Contact = db.contacts;
-//const Email = db.emails;
+const Email = db.emails;
+const Number = db.numbers;
 
-const Op = db.Sequelize.Op;
+module.exports = {
+  list(req, res) {
+    return Contact
+      .findAll({
+        include: [{
+          model: Number,
+          as: 'numbers'
+        }],
+        include: [{
+          model: Email,
+          as: 'emails'
+        }]
+      })
+      .then((contacts) => res.status(200).send(contacts))
+      .catch((error) => { res.status(400).send(error); });
+  },
 
-// Create and Save a new Contact
-exports.create = (req, res) => {
-  // Create a Contact
-  const contact = {
-    firstname: req.body.firstname,
-    lastname: req.body.lastname,
-    adress: req.body.adress
-  };
+  getById(req, res) {
+    return Contact
+      .findById(req.params.id, {
+        include: [{
+          model: Number,
+          as: 'numbers'
+        }],
+        include: [{
+          model: Email,
+          as: 'emails'
+        }]
+      })
+      .then((contact) => {
+        if (!contact) {
+          return res.status(404).send({
+            message: 'Contact Not Found',
+          });
+        }
+        return res.status(200).send(contact);
+      })
+      .catch((error) => res.status(400).send(error));
+  },
 
+  add(req, res) {
+    return Contact
+      .create({
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        adress: req.body.adress,
+      })
+      .then((contact) => res.status(201).send(contact))
+      .catch((error) => res.status(400).send(error));
+  },
 
-  // Save Contact in the database
-  Contact.create(contact)
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while creating the Contact."
-      });
-    });
-};
+  addWithNumbers(req, res) {
+    return Contact
+      .create({
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        adress: req.body.adress,
+        numbers: req.body.numbers,
+      }, {
+          include: [{
+          model: Number,
+          as: 'numbers'
+        }]
+      })
+      .then((contact) => res.status(201).send(contact))
+      .catch((error) => res.status(400).send(error));
+  },
 
-// Retrieve all Contacts from the database.
-exports.findAll = (req, res) => {
-  const firstname = req.query.firstname;
-  var condition_firstname = firstname ? { firstname: { [Op.iLike]: `%${firstname}%` } } : null;
-  //var condition_lastname = lastname ? { lastname: { [Op.iLike]: `%${lastname}%` } } : null;
+  addWithEmails(req, res) {
+    return Contact
+      .create({
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        adress: req.body.adress,
+        emails: req.body.emails,
+      }, {
+          include: [{
+          model: Email,
+          as: 'emails'
+        }]
+      })
+      .then((contact) => res.status(201).send(contact))
+      .catch((error) => res.status(400).send(error));
+  },
 
-  //Contact.findAll({ where: condition_firstname || condition_lastname})
-  Contact.findAll({ where: condition_firstname})
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving contacts."
-      });
-    });
-};
-
-// Find a single Contact with an id
-exports.findOne = (req, res) => {
-  const id = req.params.id;
-
-  Contact.findByPk(id)
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: "Error retrieving Contact with id=" + id
-      });
-    });
-};
-
-// Update a Contact by the id in the request
-exports.update = (req, res) => {
-  const id = req.params.id;
-
-  Contact.update(req.body, {
-    where: { id: id }
-  })
-    .then(num => {
-      if (num == 1) {
-        res.send({
-          message: "Contact was updated successfully."
-        });
-      } else {
-        res.send({
-          message: `Cannot update Contact with id=${id}. Maybe Contact was not found or req.body is empty!`
-        });
+  addFullContact(req, res) {
+    return Contact
+      .create({
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        adress: req.body.adress,
+        emails: req.body.emails,
+      }, 
+      {
+          include: [{
+          model: Number,
+          as: 'numbers'
+        }]
+      },
+      {
+        include: [{
+        model: Email,
+        as: 'emails'
+      }]
       }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: "Error updating Contact with id=" + id
-      });
-    });
-};
+      )
+      .then((contact) => res.status(201).send(contact))
+      .catch((error) => res.status(400).send(error));
+  },
 
-// Delete a Contact with the specified id in the request
-exports.delete = (req, res) => {
-  const id = req.params.id;
-
-  Contact.destroy({
-    where: { id: id }
-  })
-    .then(num => {
-      if (num == 1) {
-        res.send({
-          message: "Contact was deleted successfully!"
-        });
-      } else {
-        res.send({
-          message: `Cannot delete Contact with id=${id}. Maybe Contact was not found!`
-        });
+  update(req, res) {
+    console.log(req.body);
+    return Contact
+      .findById(req.params.id, {
+        include: [{
+          model: Number,
+          as: 'numbers'
+        }],
+      },
+      {
+        include: [{
+          model: Email,
+          as: 'emails'
+        }],
       }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: "Could not delete Contact with id=" + id
-      });
-    });
-};
+      )
+      .then(contact => {
+        if (!contact) {
+          return res.status(404).send({
+            message: 'Contact Not Found',
+          });
+        }
+        return contact
+          .updateAttributes({
+            firstname: req.body.firstname || contact.firstname,
+            lastname: req.body.lastname || contact.lastname,
+            adress: req.body.adress || contact.adress,
+            numbers: req.body.numbers || contact.numbers,
+            emails: req.body.emails || contact.emails
+          }, {
+              include: [{
+              model: Number,
+              as: 'numbers'
+            }]
+          },
+          {
+            include: [{
+            model: Email,
+            as: 'emails'
+          }]
+        }
+          )
+          .then(() => res.status(200).send(contact))
+          .catch((error) => {console.log(error);res.status(400).send(error);});
+      })
+      .catch((error) => {console.log(error);res.status(400).send(error);});
+  },
 
-// Delete all Contacts from the database.
-exports.deleteAll = (req, res) => {
-  Contact.destroy({
-    where: {},
-    truncate: false
-  })
-    .then(nums => {
-      res.send({ message: `${nums} Contacts were deleted successfully!` });
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while removing all contacts."
-      });
-    });
-};
+  delete(req, res) {
+    return Contact
+      .findById(req.params.id)
+      .then(contact => {
+        if (!contact) {
+          return res.status(400).send({
+            message: 'Contact Not Found',
+          });
+        }
+        return contact
 
-// find all published Contacts
-/*exports.findAllPublished = (req, res) => {
-  Contact.findAll({ where: { published: true } })
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving contacts."
-      });
-    });
-}; */
+          .destroy()
+          .then(() => res.status(204).send())
+          .catch((error) => res.status(400).send(error));
+      })
+      .catch((error) => res.status(400).send(error));
+  },
+};

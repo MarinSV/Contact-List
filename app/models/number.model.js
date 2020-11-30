@@ -1,9 +1,9 @@
 module.exports = (sequelize, DataTypes) => {
-    const Email = sequelize.define("email", {
-      email: {
+    const Number = sequelize.define("number", {
+      ContactNumber: {
         type: DataTypes.STRING
       }
     });
 
-    return Email;
+    return Number;
   };

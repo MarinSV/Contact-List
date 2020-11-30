@@ -19,9 +19,17 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
 db.contacts = require("./contact.model.js")(sequelize, Sequelize);
+db.numbers=  require("./number.model.js")(sequelize, Sequelize);
 db.emails = require("./email.model.js")(sequelize, Sequelize);
 
+db.contacts.hasMany(db.numbers, { as: "numbers" });
 db.contacts.hasMany(db.emails, { as: "emails" });
+
+db.numbers.belongsTo(db.contacts, {
+  foreignKey: "contactId",
+  as: "contact",
+});
+
 db.emails.belongsTo(db.contacts, {
   foreignKey: "contactId",
   as: "contact",
