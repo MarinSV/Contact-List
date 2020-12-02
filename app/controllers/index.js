@@ -1,9 +1,9 @@
-const contact = require('./contact.controller');
-const number = require('./number.controller');
-const email = require('./email.controller');
+const contact = require('./contact.controller.js');
+const number = require('./number.controller.js');
+const email = require('./email.controller.js');
 
 module.exports = {
   contact,
   number,
-  email,
+  email
 };

@@ -1,5 +1,3 @@
-module.exports = app => {
-
 var express = require('express');
 var router = express.Router();
 var controllers =  require('../controllers');    
@@ -8,10 +6,10 @@ const numberController = controllers.number;
 const emailController = controllers.email;
 
 
-/* GET home page. */
+// GET home page.
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
-});
+}); 
 
 /* Contact Router */
 router.get('/api/contact', contactController.list);
@@ -40,4 +38,4 @@ router.post('/api/contact/add_with_numbers', contactController.addWithNumbers);
 router.post('/api/contact/add_with_emails', contactController.addWithEmails);
 
 module.exports = router;
-};
+//};

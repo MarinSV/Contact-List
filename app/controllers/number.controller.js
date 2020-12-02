@@ -1,8 +1,8 @@
 const db = require("../models");
 
 
-const Number = db.Number;
-const Contact = db.Contact;
+const Number = db.number;
+const Contact = db.contact;
 
 module.exports = {
   list(req, res) {

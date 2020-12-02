@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const path = require('path');
 
 const app = express();
 
@@ -24,14 +25,24 @@ const db = require("./app/models");
  });
 
 // simple route
-app.get("/", (req, res) => {
-  res.json({ message: "Kontakt aplikacija." });
+//app.get("/", (req, res) => {
+//  res.json({ message: "Kontakt aplikacija." });
+//});
+
+var indexRouter = require('./app/routes/index');
+app.use('/', indexRouter);
+
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
 });
 
-require("./app/routes/index")(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
+
+module.exports = app;
